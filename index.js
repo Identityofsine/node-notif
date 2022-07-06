@@ -2,7 +2,10 @@ require('dotenv').config();
 const express = require('express')
 const app = express()
 const routes = require("./routes");
-
+const mongoose = require('mongoose');
+const connectDB = require('./db/db');
+require('./notification/notificationListener')
+connectDB();
 
 app.disable("x-powered-by"); //idky you need this but you do
 //setup middlewares
