@@ -1,13 +1,14 @@
 const {delay} = require('../gnrlfunc')
 const fs = require('fs');
 const EventEmitter = require('events');
-const Notif = require('./model/notif.model')
+const Notif = require('./model/notif.model');
 //add notifications based on a timer.
 class NotificationListener extends EventEmitter {
     //have an array of notifTimers and have an interval
     constructor() {
         super();
         this.notifTimers = [];
+        setInterval(() => this.removeExpired(), 1000 * 1)
 
     }
 
@@ -22,32 +23,47 @@ class NotificationListener extends EventEmitter {
         for(let i in this.notifTimers){
             const nT = this.notifTimers[i]
             if(nT instanceof _notifTimer){
-
-                setInterval(() => this.getNotifications(nT), nT.timer * 1000)
+                setInterval(() => {this.getNotifications(nT)}, nT.timer * 1000)
             }
             else
             console.error("MiERR: Item '%s' is not a instance of _notifTimer", nT)
-
+            
         }
     }
     async getNotifications(notifTimer) {
         if(notifTimer instanceof _notifTimer){
             //await delay(notifTimer.timer * 1000);
             const response = await notifTimer.expression();
-            const duplicate = await Notif.findOne({content:response.content}).exec();
-            if(duplicate) return res.sendStatus(409);
-
+            //if(Notif.count() > 0){
+                const duplicate = await Notif.findOne({content:response.content}).exec();
+                if(duplicate) {
+                    console.warn(`WARN : Notification from ${response?.source}, is a duplicate!`)
+                    return;
+                };
+            //}
             const result = await Notif.create({
-                "name" : email,
-                "content" : name,
-                "source": testArray,
-                "timesince": token,
-                "expiresIn": expiresIn
+                "name" : response?.name,
+                "content" : response?.content,
+                "source": response?.source,
+                "icon":response?.icon, 
+                "timesince": response?.timesent,
+                "expiresIn": response?.expireIn
             });
+            console.log(result)
             //response should be a notification object
         }
         else
             console.error("MiERR: Argument '%s' is not a instance of _notifTimer", notifTimer)
+    }
+    async removeExpired(){
+        const allNotifs = await Notif.find();
+        for(let z in allNotifs){
+            let x = allNotifs[z]
+            if(x.expiresIn <= Date.now() / 1000 ){
+                await Notif.deleteOne({ _id: x._id });
+                //console.log(`notification expires in : ${x.expiresIn}\nvs ${Date.now() / 1000}`)
+            }
+        }
     }
 }
 
