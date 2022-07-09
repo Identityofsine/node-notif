@@ -1,34 +1,15 @@
+const nll = require('../../notification')
+const notifController = nll.NotificationController;
+notifController.addnotifTimer(nll.pipereader)
+notifController.startInterval()
+
 class NotificationController{
     async getNotifications(req, res){
         console.log("GET /notifs")
-
-        //TODO:NOTIFICATION GRABBER FUNCTIOn
+        //TODO:NOTIFICATION GRABBER FUNCTION
         res.status(201).json(
             [
-                {
-                    "name":"Name",
-                    "content":"Content Shit in here",
-                    "source":"com.apple.iMessage",
-                    "icon":"assets/icon.png",
-                    "timesent":new Date().getTime(),
-                    "expireIn":60,
-                },
-                {
-                    "name":"Name",
-                    "content":"Content Shit in here",
-                    "source":"com.apple.iMessage",
-                    "icon":"assets/icon.png",
-                    "timesent":new Date().getTime(),
-                    "expireIn":60,
-                },
-                {
-                    "name":"Name",
-                    "content":"Content Shit in here",
-                    "source":"com.apple.iMessage",
-                    "icon":"assets/icon.png",
-                    "timesent":new Date().getTime(),
-                    "expireIn":60,
-                },
+                {"data":"gay"}
             ]
             )
     }

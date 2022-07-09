@@ -1,7 +1,7 @@
 const {delay} = require('../gnrlfunc')
 const fs = require('fs');
 const EventEmitter = require('events');
-
+const Notif = require('./model/notif.model')
 //add notifications based on a timer.
 class NotificationListener extends EventEmitter {
     //have an array of notifTimers and have an interval
@@ -34,6 +34,16 @@ class NotificationListener extends EventEmitter {
         if(notifTimer instanceof _notifTimer){
             //await delay(notifTimer.timer * 1000);
             const response = await notifTimer.expression();
+            const duplicate = await Notif.findOne({content:response.content}).exec();
+            if(duplicate) return res.sendStatus(409);
+
+            const result = await Notif.create({
+                "name" : email,
+                "content" : name,
+                "source": testArray,
+                "timesince": token,
+                "expiresIn": expiresIn
+            });
             //response should be a notification object
         }
         else
@@ -48,23 +58,34 @@ class _notifTimer{
         if (expression instanceof Function)
             this.expression = expression;
         else
-            this.expression = () => {};
+            this.expression = () => {}; 
         this.timer = timer;
+    }
+
+    getResponse(){
+        const response = this.expression();
+        //respose code    
     }
 }
 
-const nll = new NotificationListener();
 const pipereader = new _notifTimer(() => {
     try{
         let rawdata = fs.readFileSync('/tmp/notif-pypipe');
         let data = JSON.parse(rawdata);
-        console.log(data);
-
+        return {
+            name: data.name,
+            content: data.content,
+            source : data.source,
+            icon : data.icon,
+            timesent : data.timesent,
+            expireIn: data.expireIn,
+        }
     }
-    catch(e){
-        
-    }
+    catch(e){}
 }, 1)
 
-nll.addnotifTimer(pipereader)
-nll.startInterval();
+exports.pipereader = pipereader
+exports.NotificationListener = NotificationListener
+
+
+
