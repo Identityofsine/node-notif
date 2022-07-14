@@ -5,12 +5,16 @@ const routes = require("./routes");
 const mongoose = require('mongoose');
 const connectDB = require('./db/db');
 require('./notification/notificationListener')
-connectDB();
 
 app.disable("x-powered-by"); //idky you need this but you do
 //setup middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+(async () => {
+    await connectDB();
+    // all of the script.... 
+})();
 
 
 app.use("/", routes);

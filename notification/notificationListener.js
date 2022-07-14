@@ -35,11 +35,15 @@ class NotificationListener extends EventEmitter {
             //await delay(notifTimer.timer * 1000);
             const response = await notifTimer.expression();
             //if(Notif.count() > 0){
-                const duplicate = await Notif.findOne({content:response.content}).exec();
-                if(duplicate) {
-                    console.warn(`WARN : Notification from ${response?.source}, is a duplicate!`)
-                    return;
-                };
+                try {
+                    const duplicate = await Notif.findOne({content:response.content}).exec();
+                    if(duplicate) {
+                        console.warn(`WARN : Notification from ${response?.source}, is a duplicate!`)
+                        return;
+                    };
+                } catch (error) {
+                    console.error(error)
+                }
             //}
             const result = await Notif.create({
                 "name" : response?.name,
@@ -101,6 +105,7 @@ const pipereader = new _notifTimer(() => {
 }, 1)
 
 exports.pipereader = pipereader
+exports._notifTimer = _notifTimer;
 exports.NotificationListener = NotificationListener
 
 
